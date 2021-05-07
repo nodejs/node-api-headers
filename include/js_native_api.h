@@ -5,20 +5,14 @@
 #include <stddef.h>   // NOLINT(modernize-deprecated-headers)
 #include <stdbool.h>  // NOLINT(modernize-deprecated-headers)
 
-// Use INT_MAX, this should only be consumed by the pre-processor anyway.
-#define NAPI_VERSION_EXPERIMENTAL 2147483647
 #ifndef NAPI_VERSION
-#ifdef NAPI_EXPERIMENTAL
-#define NAPI_VERSION NAPI_VERSION_EXPERIMENTAL
-#else
 // The baseline version for N-API.
 // The NAPI_VERSION controls which version will be used by default when
 // compilling a native addon. If the addon developer specifically wants to use
 // functions available in a new version of N-API that is not yet ported in all
 // LTS versions, they can set NAPI_VERSION knowing that they have specifically
 // depended on that version.
-#define NAPI_VERSION 7
-#endif
+#define NAPI_VERSION 8
 #endif
 
 #include "js_native_api_types.h"
@@ -539,7 +533,7 @@ NAPI_EXTERN napi_status napi_is_detached_arraybuffer(napi_env env,
                                                      bool* result);
 #endif  // NAPI_VERSION >= 7
 
-#ifdef NAPI_EXPERIMENTAL
+#if NAPI_VERSION >= 8
 // Type tagging
 NAPI_EXTERN napi_status napi_type_tag_object(napi_env env,
                                              napi_value value,
@@ -554,7 +548,7 @@ NAPI_EXTERN napi_status napi_object_freeze(napi_env env,
                                            napi_value object);
 NAPI_EXTERN napi_status napi_object_seal(napi_env env,
                                          napi_value object);
-#endif  // NAPI_EXPERIMENTAL
+#endif  // NAPI_VERSION >= 8
 
 EXTERN_C_END
 
