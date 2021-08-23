@@ -57,10 +57,10 @@ grouped by version and api types.
 
 ```js
     V1: {
-        js_native_api_symblos: [
+        js_native_api_symbols: [
             // List of symbols in js_native_api.h for the version 1.
         ],
-        node_api_symblos: [
+        node_api_symbols: [
           // List of symbols in node_api.h for the version 1
         ]
     },
