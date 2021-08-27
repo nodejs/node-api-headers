@@ -16,10 +16,10 @@
 
 ## Introduction
 
-The **node-api-headers** contains the header files for the C based
-Node-API provided by Node.js. Node-API is an API for building native addons
-that guarantees the ABI (Application Binary Interface) stability across
-versions of Node.js (see: [Node-API](https://nodejs.org/dist/latest/docs/api/n-api.html)).
+**node-api-headers** contains the header files for the C-based Node-API
+provided by Node.js. Node-API is an API for building native addons that
+guarantees the ABI (Application Binary Interface) stability across versions
+of Node.js (see: [Node-API](https://nodejs.org/dist/latest/docs/api/n-api.html)).
 
 Node-API headers are in the `include` folder. The Node-APIs that provide
 ECMAScript features from native code can be found in `js_native_api_types.h`
@@ -27,10 +27,10 @@ and `js_native_api.h`. The APIs defined in these headers are included in
 `node_api_types.h` and `node_api.h`.
 The headers are structured in this way in order to allow implementations of
 Node-API outside of Node.js considering that for those implementations the
-Node.js specific APIS may not be applicable.
+Node.js specific APIs may not be applicable.
 
-The **node-api-headers** is also a package published on **npm** that could
-be used in a process to compile and build native addons for Node.js.
+**node-api-headers** is also a package published on **npm** that could be used
+in a process to compile and build native addons for Node.js.
 
 <a name="install"></a>
 
