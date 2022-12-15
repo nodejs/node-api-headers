@@ -186,7 +186,7 @@ const v6 = {
         'napi_set_instance_data'
     ],
     node_api_symbols: [
-        ...v5.js_native_api_symbols
+        ...v5.node_api_symbols
     ]
 }
 
