@@ -5,7 +5,7 @@ const { resolve } = require('path');
 
 const files = ['js_native_api_types.h', 'js_native_api.h', 'node_api_types.h', 'node_api.h'];
 
-const commit = process.argv[2] ?? 'main';
+const commit = process.argv[2] ?? `${process.version.substring(0,3)}.x`;
 
 console.log(`Using commit ${commit}:`);
 
