@@ -1,54 +1,87 @@
-const { spawnSync } = require('child_process');
-const { resolve } = require('path');
-const { writeFileSync } = require('fs');
+// @ts-check
+'use strict';
 
-function getSymbolsForVersion(version) {
-    const spawned = spawnSync('clang',
-        ['-Xclang', '-ast-dump=json', '-fsyntax-only', '-fno-diagnostics-color', version ? `-DNAPI_VERSION=${version}` : '-DNAPI_EXPERIMENTAL', resolve(__dirname, '..', 'include', 'node_api.h')],
-        { maxBuffer: 2_000_000 }
-    );
+const { spawn } = require('child_process');
+const { resolve: resolvePath } = require('path');
+const { writeFile } = require('fs/promises');
 
-    if (spawned.error) {
-        if (spawned.error.code === 'ENOENT') {
+/** @typedef {{ js_native_api_symbols: string[]; node_api_symbols: string[]; }} SymbolInfo */
+
+/**
+ * @param {number | undefined} [version]
+ * @returns {Promise<SymbolInfo>}
+ */
+async function getSymbolsForVersion(version) {
+    try {
+        const { exitCode, stdout, stderr } = await new Promise((resolve, reject) => {
+            const spawned = spawn('clang',
+                ['-Xclang', '-ast-dump=json', '-fsyntax-only', '-fno-diagnostics-color', version ? `-DNAPI_VERSION=${version}` : '-DNAPI_EXPERIMENTAL', resolvePath(__dirname, '..', 'include', 'node_api.h')]
+            );
+
+            let stdout = '';
+            let stderr = '';
+
+            spawned.stdout?.on('data', (data) => {
+                stdout += data.toString('utf-8');
+            });
+            spawned.stderr?.on('data', (data) => {
+                stderr += data.toString('utf-8');
+            });
+
+            spawned.on('exit', function (exitCode) {
+                resolve({ exitCode, stdout, stderr });
+            });
+
+            spawned.on('error', function (err) {
+                reject(err);
+            });
+        });
+
+        if (exitCode !== 0) {
+            throw new Error(`clang exited with non-zero exit code ${exitCode}. stderr: ${stderr ? stderr : '<empty>'}`);
+        }
+
+        const ast = JSON.parse(stdout);
+
+        /** @type {{js_native_api_symbols: string[], node_api_symbols: string[]}} */
+        const symbols = { js_native_api_symbols: [], node_api_symbols: [] };
+
+        for (const statement of ast.inner) {
+            if (statement.kind !== 'FunctionDecl') {
+                continue;
+            }
+
+            const name = statement.name;
+            const file = statement.loc.includedFrom?.file;
+
+            if (file) {
+                symbols.js_native_api_symbols.push(name);
+            } else {
+                symbols.node_api_symbols.push(name);
+            }
+        }
+
+        symbols.js_native_api_symbols.sort();
+        symbols.node_api_symbols.sort();
+
+        return symbols;
+    } catch (err) {
+        if (err.code === 'ENOENT') {
             throw new Error('This tool requires clang to be installed.');
         }
-        throw spawned.error;
-    } else if (spawned.stderr.length > 0) {
-        throw new Error(spawned.stderr.toString('utf-8'));
+        throw err;
     }
-
-    const ast = JSON.parse(spawned.stdout.toString('utf-8'));
-    const symbols = { js_native_api_symbols: [], node_api_symbols: [] };
-
-    for (const statement of ast.inner) {
-        if (statement.kind !== 'FunctionDecl') {
-            continue;
-        }
-
-        const name = statement.name;
-        const file = statement.loc.includedFrom?.file;
-
-        if (file) {
-            symbols.js_native_api_symbols.push(name);
-        } else {
-            symbols.node_api_symbols.push(name);
-        }
-    }
-
-    symbols.js_native_api_symbols.sort();
-    symbols.node_api_symbols.sort();
-
-    return symbols;
 }
 
-
-function getAllSymbols() {
+/** @returns {Promise<{maxVersion: number, symbols: {[x: string]: SymbolInfo}}>} */
+async function getAllSymbols() {
+    /** @type {{[x: string]: SymbolInfo}} */
     const allSymbols = {};
     let version = 1;
 
     console.log('Processing symbols from clang:')
     while (true) {
-        const symbols = getSymbolsForVersion(version);
+        const symbols = await getSymbolsForVersion(version);
 
         if (version > 1) {
             const previousSymbols = allSymbols[`v${version - 1}`];
@@ -62,7 +95,7 @@ function getAllSymbols() {
         ++version;
     }
 
-    const symbols = allSymbols[`experimental`] = getSymbolsForVersion();
+    const symbols = allSymbols[`experimental`] = await getSymbolsForVersion();
     console.log(`  Experimental: ${symbols.js_native_api_symbols.length} js_native_api_symbols, ${symbols.node_api_symbols.length} node_api_symbols`);
     return {
         maxVersion: version,
@@ -70,7 +103,13 @@ function getAllSymbols() {
     };
 }
 
+/**
+ * @param {SymbolInfo} previousSymbols
+ * @param {SymbolInfo} currentSymbols
+ * @returns {SymbolInfo}
+ */
 function getUniqueSymbols(previousSymbols, currentSymbols) {
+    /** @type {SymbolInfo} */
     const symbols = { js_native_api_symbols: [], node_api_symbols: [] };
     for (const symbol of currentSymbols.js_native_api_symbols) {
         if (!previousSymbols.js_native_api_symbols.includes(symbol)) {
@@ -85,22 +124,25 @@ function getUniqueSymbols(previousSymbols, currentSymbols) {
     return symbols;
 }
 
-function joinSymbols(symbols, prependNewLine) {
-    if (symbols.length === 0) return '';
-    return `${prependNewLine ? ',\n        ' : ''}'${symbols.join("',\n        '")}'`;
+/**
+ * @param {string[]} strings
+ */
+function joinStrings(strings, prependNewLine = false) {
+    if (strings.length === 0) return '';
+    return `${prependNewLine ? ',\n        ' : ''}'${strings.join("',\n        '")}'`;
 }
 
-function getSymbolData() {
-    const { maxVersion, symbols } = getAllSymbols();
+async function getSymbolData() {
+    const { maxVersion, symbols } = await getAllSymbols();
 
     let data = `'use strict'
 
 const v1 = {
     js_native_api_symbols: [
-        ${joinSymbols(symbols.v1.js_native_api_symbols)}
+        ${joinStrings(symbols.v1.js_native_api_symbols)}
     ],
     node_api_symbols: [
-        ${joinSymbols(symbols.v1.node_api_symbols)}
+        ${joinStrings(symbols.v1.node_api_symbols)}
     ]
 }
 `;
@@ -111,10 +153,10 @@ const v1 = {
         data += `
 const ${version === maxVersion + 1 ? 'experimental' : `v${version}`} = {
     js_native_api_symbols: [
-        ...v${version - 1}.js_native_api_symbols${joinSymbols(newSymbols.js_native_api_symbols, true)}
+        ...v${version - 1}.js_native_api_symbols${joinStrings(newSymbols.js_native_api_symbols, true)}
     ],
     node_api_symbols: [
-        ...v${version - 1}.node_api_symbols${joinSymbols(newSymbols.node_api_symbols, true)}
+        ...v${version - 1}.node_api_symbols${joinStrings(newSymbols.node_api_symbols, true)}
     ]
 }
 `;
@@ -129,16 +171,14 @@ module.exports = {
     return data;
 }
 
-function main() {
-    const path = resolve(__dirname, '../symbols.js');
-    const data = getSymbolData();
+async function main() {
+    const path = resolvePath(__dirname, '../symbols.js');
+    const data = await getSymbolData();
     console.log(`Writing symbols to ${path}`)
-    writeFileSync(path, data);
+    return writeFile(path, data);
 }
 
-try {
-    main();
-} catch (e) {
+main().catch(e => {
     console.error(e);
     process.exitCode = 1;
-}
+});

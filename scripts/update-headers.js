@@ -1,3 +1,5 @@
+'use strict';
+
 const { createWriteStream } = require('fs');
 const { Readable } = require('stream');
 const { finished } = require('stream/promises');
