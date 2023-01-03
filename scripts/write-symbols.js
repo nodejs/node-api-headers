@@ -1,4 +1,3 @@
-// @ts-check
 'use strict';
 
 const { spawn } = require('child_process');
@@ -43,7 +42,7 @@ async function getSymbolsForVersion(version) {
 
         const ast = JSON.parse(stdout);
 
-        /** @type {{js_native_api_symbols: string[], node_api_symbols: string[]}} */
+        /** @type {SymbolInfo} */
         const symbols = { js_native_api_symbols: [], node_api_symbols: [] };
 
         for (const statement of ast.inner) {
