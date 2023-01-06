@@ -7,14 +7,14 @@ const { writeFile } = require('fs/promises');
 /** @typedef {{ js_native_api_symbols: string[]; node_api_symbols: string[]; }} SymbolInfo */
 
 /**
- * @param {number | undefined} [version]
+ * @param {number} [version]
  * @returns {Promise<SymbolInfo>}
  */
 async function getSymbolsForVersion(version) {
     try {
         const { exitCode, stdout, stderr } = await new Promise((resolve, reject) => {
             const spawned = spawn('clang',
-                ['-Xclang', '-ast-dump=json', '-fsyntax-only', '-fno-diagnostics-color', version ? `-DNAPI_VERSION=${version}` : '-DNAPI_EXPERIMENTAL', resolvePath(__dirname, '..', 'include', 'node_api.h')]
+                ['-Xclang', '-ast-dump=json', '-fsyntax-only', '-fno-diagnostics-color', `-DNAPI_VERSION=${version}`, resolvePath(__dirname, '..', 'include', 'node_api.h')]
             );
 
             let stdout = '';
@@ -94,8 +94,6 @@ async function getAllSymbols() {
         ++version;
     }
 
-    const symbols = allSymbols[`experimental`] = await getSymbolsForVersion();
-    console.log(`  Experimental: ${symbols.js_native_api_symbols.length} js_native_api_symbols, ${symbols.node_api_symbols.length} node_api_symbols`);
     return {
         maxVersion: version,
         symbols: allSymbols
@@ -146,11 +144,11 @@ const v1 = {
 }
 `;
 
-    for (let version = 2; version <= maxVersion + 1; ++version) {
-        const newSymbols = getUniqueSymbols(symbols[`v${version - 1}`], symbols[version === maxVersion + 1 ? 'experimental' : `v${version}`]);
+    for (let version = 2; version <= maxVersion; ++version) {
+        const newSymbols = getUniqueSymbols(symbols[`v${version - 1}`], symbols[`v${version}`]);
 
         data += `
-const ${version === maxVersion + 1 ? 'experimental' : `v${version}`} = {
+const ${`v${version}`} = {
     js_native_api_symbols: [
         ...v${version - 1}.js_native_api_symbols${joinStrings(newSymbols.js_native_api_symbols, true)}
     ],
@@ -163,8 +161,7 @@ const ${version === maxVersion + 1 ? 'experimental' : `v${version}`} = {
 
     data += `
 module.exports = {
-    ${new Array(maxVersion).fill(undefined).map((_, i) => `v${i + 1}`).join(',\n    ')},
-    experimental
+    ${new Array(maxVersion).fill(undefined).map((_, i) => `v${i + 1}`).join(',\n    ')}
 }
 `
     return data;
