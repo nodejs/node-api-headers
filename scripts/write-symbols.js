@@ -148,7 +148,7 @@ const v1 = {
         const newSymbols = getUniqueSymbols(symbols[`v${version - 1}`], symbols[`v${version}`]);
 
         data += `
-const ${`v${version}`} = {
+const v${version} = {
     js_native_api_symbols: [
         ...v${version - 1}.js_native_api_symbols${joinStrings(newSymbols.js_native_api_symbols, true)}
     ],
