@@ -1,15 +1,127 @@
 'use strict';
 
-const { createWriteStream } = require('fs');
+const { writeFile } = require('fs/promises');
 const { Readable } = require('stream');
-const { finished } = require('stream/promises');
 const { resolve } = require('path');
 const { parseArgs } = require('util')
+const { createInterface } = require('readline');
+const { inspect } = require('util');
+
 
 async function getLatestReleaseVersion() {
     const response = await fetch('https://nodejs.org/download/release/index.json');
     const json = await response.json();
     return json[0].version;
+}
+
+/**
+ * @param {NodeJS.ReadableStream} stream
+ * @param {string} destination
+ * @param {boolean} verbose
+ */
+function removeExperimentals(stream, destination, verbose) {
+    return new Promise((resolve, reject) => {
+        const debug = (...args) => {
+            if (verbose) {
+                console.log(...args);
+            }
+        };
+        const rl = createInterface(stream);
+
+        /** @type {Array<'write' | 'ignore'>} */
+        let mode = ['write'];
+
+        /** @type {Array<string>} */
+        const macroStack = [];
+
+        /** @type {RegExpMatchArray | null} */
+        let matches;
+
+        let lineNumber = 0;
+        let toWrite = "";
+
+        rl.on('line', function lineHandler(line) {
+            ++lineNumber;
+            if (matches = line.match(/^\s*#if(n)?def\s+([A-Za-z_][A-Za-z0-9_]*)/)) {
+                const negated = Boolean(matches[1]);
+                const identifier = matches[2];
+                macroStack.push(identifier);
+
+                debug(`Line ${lineNumber} Pushed ${identifier}`);
+
+                if (identifier === 'NAPI_EXPERIMENTAL') {
+                    if (negated) {
+                        mode.push('write');
+                    } else {
+                        mode.push('ignore');
+                    }
+                    return;
+                } else {
+                    mode.push('write');
+                }
+
+            }
+            else if (matches = line.match(/^\s*#if\s+(.+)$/)) {
+                const identifier = matches[1];
+                macroStack.push(identifier);
+                mode.push('write');
+
+                debug(`Line ${lineNumber} Pushed ${identifier}`);
+            }
+            else if (line.match(/^#else(?:\s+|$)/)) {
+                const identifier = macroStack[macroStack.length - 1];
+
+                debug(`Line ${lineNumber} Peeked ${identifier}`);
+
+                if (!identifier) {
+                    rl.off('line', lineHandler);
+                    reject(new Error(`Macro stack is empty handling #else on line ${lineNumber}`));
+                }
+
+                if (identifier === 'NAPI_EXPERIMENTAL') {
+                    const lastMode = mode[mode.length - 1];
+                    mode[mode.length - 1] = (lastMode === 'ignore') ? 'write' : 'ignore';
+                    return;
+                }
+            }
+            else if (line.match(/^\s*#endif(?:\s+|$)/)) {
+                const identifier = macroStack.pop();
+                mode.pop();
+
+                debug(`Line ${lineNumber} Popped ${identifier}`);
+
+                if (!identifier) {
+                    rl.off('line', lineHandler);
+                    reject(new Error(`Macro stack is empty handling #endif on line ${lineNumber}`));
+                }
+
+                if (identifier === 'NAPI_EXPERIMENTAL') {
+                    return;
+                }
+            }
+
+            if (mode.length === 0) {
+                rl.off('line', lineHandler);
+                reject(new Error(`Write mode empty handling #endif on line ${lineNumber}`));
+            }
+
+            if (mode[mode.length - 1] === 'write') {
+                toWrite += `${line}\n`;
+            }
+        });
+
+        rl.on('close', () => {
+            if (macroStack.length > 0) {
+                reject(new Error(`Macro stack is not empty at EOF: ${inspect(macroStack)}`));
+            }
+            else if (mode.length > 1) {
+                reject(new Error(`Write mode greater than 1 at EOF: ${inspect(mode)}`));
+            }
+            else {
+                resolve(writeFile(destination, toWrite));
+            }
+        });
+    });
 }
 
 async function main() {
@@ -44,8 +156,7 @@ async function main() {
             throw new Error(`Fetch of ${url} returned ${response.status} ${response.statusText}`);
         }
 
-        const stream = createWriteStream(path);
-        await finished(Readable.fromWeb(response.body).pipe(stream));
+        await removeExperimentals(Readable.fromWeb(response.body), path, verbose)
     }
 }
 
