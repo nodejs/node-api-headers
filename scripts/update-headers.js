@@ -6,8 +6,11 @@ const { resolve } = require('path');
 const { parseArgs } = require('util')
 const { createInterface } = require('readline');
 const { inspect } = require('util');
+const { runClang } = require('./clang-utils');
 
-
+/**
+ * @returns {Promise<string>} Version string, eg. `'v19.6.0'`.
+ */
 async function getLatestReleaseVersion() {
     const response = await fetch('https://nodejs.org/download/release/index.json');
     const json = await response.json();
@@ -18,8 +21,9 @@ async function getLatestReleaseVersion() {
  * @param {NodeJS.ReadableStream} stream
  * @param {string} destination
  * @param {boolean} verbose
+ * @returns {Promise<void>} The `writeFile` Promise.
  */
-function removeExperimentals(stream, destination, verbose) {
+function removeExperimentals(stream, destination, verbose = false) {
     return new Promise((resolve, reject) => {
         const debug = (...args) => {
             if (verbose) {
@@ -38,7 +42,7 @@ function removeExperimentals(stream, destination, verbose) {
         let matches;
 
         let lineNumber = 0;
-        let toWrite = "";
+        let toWrite = '';
 
         rl.on('line', function lineHandler(line) {
             ++lineNumber;
@@ -76,6 +80,7 @@ function removeExperimentals(stream, destination, verbose) {
                 if (!identifier) {
                     rl.off('line', lineHandler);
                     reject(new Error(`Macro stack is empty handling #else on line ${lineNumber}`));
+                    return;
                 }
 
                 if (identifier === 'NAPI_EXPERIMENTAL') {
@@ -103,6 +108,7 @@ function removeExperimentals(stream, destination, verbose) {
             if (mode.length === 0) {
                 rl.off('line', lineHandler);
                 reject(new Error(`Write mode empty handling #endif on line ${lineNumber}`));
+                return;
             }
 
             if (mode[mode.length - 1] === 'write') {
@@ -117,6 +123,9 @@ function removeExperimentals(stream, destination, verbose) {
             else if (mode.length > 1) {
                 reject(new Error(`Write mode greater than 1 at EOF: ${inspect(mode)}`));
             }
+            else if (toWrite.match(/^\s*#if(?:n)?def\s+NAPI_EXPERIMENTAL/m)) {
+                reject(new Error(`Output has match for NAPI_EXPERIMENTAL`));
+            }
             else {
                 resolve(writeFile(destination, toWrite));
             }
@@ -124,17 +133,29 @@ function removeExperimentals(stream, destination, verbose) {
     });
 }
 
+/**
+ * Validate syntax for a file using clang.
+ * @param {string} path Path for file to validate with clang.
+ */
+async function validateSyntax(path) {
+    try { 
+        await runClang(['-fsyntax-only', path]);
+    } catch (e) {
+        throw new Error(`Syntax validation failed for ${path}: ${e}`);
+    }
+}
+
 async function main() {
     const { values: { tag, verbose } } = parseArgs({
         options: {
             tag: {
-                type: "string",
-                short: "t",
+                type: 'string',
+                short: 't',
                 default: await getLatestReleaseVersion()
             },
             verbose: {
-                type: "boolean",
-                short: "v",
+                type: 'boolean',
+                short: 'v',
             },
         },
     });
@@ -156,7 +177,9 @@ async function main() {
             throw new Error(`Fetch of ${url} returned ${response.status} ${response.statusText}`);
         }
 
-        await removeExperimentals(Readable.fromWeb(response.body), path, verbose)
+        await removeExperimentals(Readable.fromWeb(response.body), path, verbose);
+
+        await validateSyntax(path);
     }
 }
 

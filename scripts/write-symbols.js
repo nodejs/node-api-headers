@@ -1,8 +1,8 @@
 'use strict';
 
-const { spawn } = require('child_process');
 const { resolve: resolvePath } = require('path');
 const { writeFile } = require('fs/promises');
+const { runClang } = require('./clang-utils');
 
 /** @typedef {{ js_native_api_symbols: string[]; node_api_symbols: string[]; }} SymbolInfo */
 
@@ -12,33 +12,7 @@ const { writeFile } = require('fs/promises');
  */
 async function getSymbolsForVersion(version) {
     try {
-        const { exitCode, stdout, stderr } = await new Promise((resolve, reject) => {
-            const spawned = spawn('clang',
-                ['-Xclang', '-ast-dump=json', '-fsyntax-only', '-fno-diagnostics-color', `-DNAPI_VERSION=${version}`, resolvePath(__dirname, '..', 'include', 'node_api.h')]
-            );
-
-            let stdout = '';
-            let stderr = '';
-
-            spawned.stdout?.on('data', (data) => {
-                stdout += data.toString('utf-8');
-            });
-            spawned.stderr?.on('data', (data) => {
-                stderr += data.toString('utf-8');
-            });
-
-            spawned.on('exit', function (exitCode) {
-                resolve({ exitCode, stdout, stderr });
-            });
-
-            spawned.on('error', function (err) {
-                reject(err);
-            });
-        });
-
-        if (exitCode !== 0) {
-            throw new Error(`clang exited with non-zero exit code ${exitCode}. stderr: ${stderr ? stderr : '<empty>'}`);
-        }
+        const { stdout } = await runClang([ '-ast-dump=json', '-fsyntax-only', '-fno-diagnostics-color', `-DNAPI_VERSION=${version}`, resolvePath(__dirname, '..', 'include', 'node_api.h')])
 
         const ast = JSON.parse(stdout);
 
