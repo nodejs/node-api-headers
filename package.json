@@ -46,6 +46,8 @@
     "url": "git://github.com/nodejs/node-api-headers.git"
   },
   "scripts": {
+    "update-headers": "node --no-warnings scripts/update-headers.js",
+    "write-symbols": "node --no-warnings scripts/write-symbols.js"
   },
   "version": "0.0.2",
   "support": true
