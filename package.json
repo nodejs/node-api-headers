@@ -49,7 +49,7 @@
     "update-headers": "node --no-warnings scripts/update-headers.js",
     "write-symbols": "node --no-warnings scripts/write-symbols.js"
   },
-  "version": "0.0.2",
+  "version": "0.0.3",
   "support": true
 }
 
