@@ -47,9 +47,9 @@
   },
   "scripts": {
     "update-headers": "node --no-warnings scripts/update-headers.js",
-    "write-symbols": "node --no-warnings scripts/write-symbols.js"
+    "write-symbols": "node --no-warnings scripts/write-symbols.js",
+    "write-win32-def": "node --no-warnings scripts/write-win32-def.js"
   },
   "version": "0.0.4",
   "support": true
 }
-
