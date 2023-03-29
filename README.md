@@ -5,6 +5,7 @@
 - **[Code of Conduct](CODE_OF_CONDUCT.md)**
 - **[Install](#install)**
 - **[API](#api)**
+- **[Creating a release](CREATING_A_RELEASE.md)**
 - **[Team](#team)**
 - **[License](#license)**
 
