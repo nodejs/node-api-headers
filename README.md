@@ -50,7 +50,7 @@ The module exports two properties `include_dir` and `symbols`.
 This property is a string that represents the include path for the Node-API
 headers.
 
-### `def`
+### `def_paths`
 
 This property is an object that has two keys `js_native_api_def` and
 `node_api_def` which represents the path of the module definition file for the
