@@ -1,7 +1,7 @@
 'use strict';
 
-const { resolve: resolvePath } = require('path');
-const { writeFile } = require('fs/promises');
+const { resolve: resolvePath, join: joinPath } = require('path');
+const { writeFile, mkdir } = require('fs/promises');
 const { symbols } = require('..');
 
 function getNodeApiDef() {
@@ -28,11 +28,20 @@ function getJsNativeApiDef() {
 }
 
 async function main() {
-    const nodeApiDefPath = resolvePath(__dirname, '../node_api.def');
+    const def = resolvePath(__dirname, '../def'); 
+    try {
+        await mkdir(def)
+    } catch (e) {
+        if (e.code !== 'EEXIST') {
+            throw e;
+        }
+    }
+   
+    const nodeApiDefPath = joinPath(def, 'node_api.def');
     console.log(`Writing Windows .def file to ${nodeApiDefPath}`);
     await writeFile(nodeApiDefPath, getNodeApiDef());
 
-    const jsNativeApiDefPath = resolvePath(__dirname, '../js_native_api.def');
+    const jsNativeApiDefPath = joinPath(def, 'js_native_api.def');
     console.log(`Writing Windows .def file to ${jsNativeApiDefPath}`);
     await writeFile(jsNativeApiDefPath, getJsNativeApiDef());
 }
