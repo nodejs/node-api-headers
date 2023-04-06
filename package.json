@@ -20,6 +20,10 @@
       "url": "https://github.com/legendecas"
     },
     {
+      "name": "Leonid Pospelov",
+      "url": "https://github.com/Pospelove"
+    },
+    {
       "name": "Michael Dawson",
       "url": "https://github.com/mhdawson"
     },
@@ -50,6 +54,6 @@
     "write-symbols": "node --no-warnings scripts/write-symbols.js",
     "write-win32-def": "node --no-warnings scripts/write-win32-def.js"
   },
-  "version": "0.0.4",
+  "version": "0.0.5",
   "support": true
 }

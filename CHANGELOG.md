@@ -1,5 +1,19 @@
 # node-api-headers Changelog
 
+## 2023-04-06 Version 0.0.5, @NickNaso
+
+### Notable changes
+
+- Provide def file for windows import lib.
+
+### Commits
+
+- \[[`15477c5898`](https://github.com/nodejs/node-api-headers/commit/15477c5898)] - Update headers from nodejs/node tag v19.8.1 (#22) (github-actions\[bot])
+- \[[`d7fa23b60e`](https://github.com/nodejs/node-api-headers/commit/d7fa23b60e)] - Use git status instead of git diff for change calculation (#21) (Kevin Eady)
+- \[[`ea0dc01425`](https://github.com/nodejs/node-api-headers/commit/ea0dc01425)] - **fix**: moved def files on a proper folder. (#19) (Nicola Del Gobbo)
+- \[[`069c3eb6f8`](https://github.com/nodejs/node-api-headers/commit/069c3eb6f8)] - **doc**: how to create a new release. (#18) (Nicola Del Gobbo)
+- \[[`d23c2879c8`](https://github.com/nodejs/node-api-headers/commit/d23c2879c8)] - Provide def file for windows import lib (#17) (Leonid Pospelov)
+
 ## 2023-03-17 Version 0.0.4, @NickNaso
 
 ### Notable changes
