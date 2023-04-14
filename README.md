@@ -41,6 +41,17 @@ in a process to compile and build native addons for Node.js.
 npm i node-api-headers
 ```
 
+<a name="versions"></a>
+
+## Versions
+
+Node-api C headers are backward-compatible. Its version (e.g. `8`) is released 
+separately from the Node.js version stream (e.g. `19.8.1`) and changes are 
+backported to active Node.js LTS lines (e.g. `16.x` and `18.x`).
+
+This package publishes semver-minor versions with new node-api C headers changes.
+JS API breaking changes are published with new semver-major versions.
+
 <a name="api"></a>
 
 ## API
