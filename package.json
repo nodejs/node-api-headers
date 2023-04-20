@@ -54,6 +54,6 @@
     "write-symbols": "node --no-warnings scripts/write-symbols.js",
     "write-win32-def": "node --no-warnings scripts/write-win32-def.js"
   },
-  "version": "0.0.5",
+  "version": "1.0.0",
   "support": true
 }

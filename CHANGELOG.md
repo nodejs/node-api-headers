@@ -1,5 +1,17 @@
 # node-api-headers Changelog
 
+## 2023-04-20 Version 1.0.0, @NickNaso
+
+### Notable changes
+
+- Explain package version rationale.
+- Update headers from nodejs/node tag v19.9.0.
+
+### Commits
+
+- \[[`130338da33`](https://github.com/nodejs/node-api-headers/commit/130338da33)] - **doc**: explain package version rationale (#26) (Chengzhong Wu)
+- \[[`1a328031da`](https://github.com/nodejs/node-api-headers/commit/1a328031da)] - Update headers from nodejs/node tag v19.9.0 (#24) (github-actions\[bot])
+
 ## 2023-04-06 Version 0.0.5, @NickNaso
 
 ### Notable changes
@@ -18,7 +30,7 @@
 
 ### Notable changes
 
-- Update headers from nodejs/node tag v19.8.0
+- Update headers from nodejs/node tag v19.8.0.
 
 ### Commits
 
@@ -29,7 +41,7 @@
 
 ### Notable changes
 
-- Add helper scripts for updating headers and symbols.js
+- Add helper scripts for updating headers and symbols.js.
 
 ### Commits
 
