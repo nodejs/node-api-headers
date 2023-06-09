@@ -215,6 +215,19 @@ const v8 = {
     ]
 }
 
+const v9 = {
+    js_native_api_symbols: [
+        ...v8.js_native_api_symbols,
+        'node_api_create_syntax_error',
+        'node_api_symbol_for',
+        'node_api_throw_syntax_error'
+    ],
+    node_api_symbols: [
+        ...v8.node_api_symbols,
+        'node_api_get_module_file_name'
+    ]
+}
+
 module.exports = {
     v1,
     v2,
@@ -223,5 +236,6 @@ module.exports = {
     v5,
     v6,
     v7,
-    v8
+    v8,
+    v9
 }
