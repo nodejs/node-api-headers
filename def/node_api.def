@@ -145,3 +145,7 @@ napi_check_object_type_tag
 napi_object_freeze
 napi_object_seal
 napi_type_tag_object
+node_api_get_module_file_name
+node_api_create_syntax_error
+node_api_symbol_for
+node_api_throw_syntax_error
