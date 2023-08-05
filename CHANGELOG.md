@@ -1,5 +1,15 @@
 # node-api-headers Changelog
 
+## 2023-08-05 Version 1.1.0, @NickNaso
+
+### Notable changes
+
+- Update headers from nodejs/node tag v20.3.0.
+
+### Commits
+
+- \[[`1f5a85dbb0`](https://github.com/nodejs/node-api-headers/commit/1f5a85dbb0)] - Update headers from nodejs/node tag v20.3.0 (#30) (github-actions\[bot])
+
 ## 2023-05-18 Version 1.0.1, @NickNaso
 
 ### Notable changes

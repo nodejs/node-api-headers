@@ -9,7 +9,7 @@
 - **[Team](#team)**
 - **[License](#license)**
 
-## Current Node-API version: 8
+## Current Node-API version: 9
 
 (See [CHANGELOG.md](CHANGELOG.md) for complete Changelog)
 
