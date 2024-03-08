@@ -88,6 +88,8 @@ NAPI_EXTERN napi_status NAPI_CDECL napi_create_string_utf16(napi_env env,
                                                             const char16_t* str,
                                                             size_t length,
                                                             napi_value* result);
+
+
 NAPI_EXTERN napi_status NAPI_CDECL napi_create_symbol(napi_env env,
                                                       napi_value description,
                                                       napi_value* result);
