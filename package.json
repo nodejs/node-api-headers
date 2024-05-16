@@ -51,6 +51,7 @@
   },
   "scripts": {
     "update-headers": "node --no-warnings scripts/update-headers.js",
+    "update-changelog": "node --no-warnings scripts/update-changelog.js",
     "write-symbols": "node --no-warnings scripts/write-symbols.js",
     "write-win32-def": "node --no-warnings scripts/write-win32-def.js"
   },
