@@ -1,0 +1,53 @@
+name: Publish Release
+
+on:
+  workflow_dispatch:
+
+  # Uncomment below to enable automated running of publish task on changes to
+  # package.json on main branch.
+
+  # push:
+  #   branches: ['main']
+  #   paths: ['package.json']
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Publish Release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+      - shell: bash
+        id: release-vars
+        name: Compute Release Variables
+        run: |
+          VERSION=$(jq -r ".version" package.json)
+          PACKAGE_NAME=$(jq -r ".name" package.json)
+          npm show $PACKAGE_NAME@$VERSION && true
+          SHOULD_PUBLISH_VERSION="$?"
+          echo "VERSION=$VERSION PACKAGE_NAME=$PACKAGE_NAME SHOULD_PUBLISH_VERSION=$SHOULD_PUBLISH_VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "SHOULD_PUBLISH_VERSION=$SHOULD_PUBLISH_VERSION" >> $GITHUB_OUTPUT
+      - name: Publish to npm
+        if: ${{ steps.release-vars.outputs.SHOULD_PUBLISH_VERSION != '0' }}
+        run: |
+          npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Create GitHub Release
+        if: ${{ steps.release-vars.outputs.SHOULD_PUBLISH_VERSION != '0' }}
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v${{ steps.release-vars.outputs.VERSION }}
+          commit: main
+          name: Release ${{ steps.release-vars.outputs.VERSION }}
+          generateReleaseNotes: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          skipIfReleaseExists: true
