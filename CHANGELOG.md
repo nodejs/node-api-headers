@@ -6,7 +6,6 @@
 ### Features
 
 * update headers from nodejs/node tag v22.1.0 ([d5cfe19](https://github.com/nodejs/node-api-headers/commit/d5cfe19da8b974ca35764dd1c73b91d57cd3c4ce))
-* update headers from nodejs/node tag v22.1.0 ([aa57149](https://github.com/nodejs/node-api-headers/commit/aa571490c9da925aba747c209b0e565e1562329f))
 
 ## 2023-08-05 Version 1.1.0, @NickNaso
 
