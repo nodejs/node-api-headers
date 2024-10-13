@@ -6,7 +6,7 @@ const { resolve } = require('path');
 const { parseArgs } = require('util')
 const { createInterface } = require('readline');
 const { inspect } = require('util');
-const { runClang } = require('./clang-utils');
+const { runClang } = require('../lib/clang-utils');
 const { evaluate } = require('../lib/parse-utils');
 
 /**
