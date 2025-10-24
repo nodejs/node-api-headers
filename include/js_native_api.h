@@ -17,6 +17,7 @@
 #define NAPI_VERSION 8
 #endif
 
+
 #include "js_native_api_types.h"
 
 // If you need __declspec(dllimport), either include <node_api.h> instead, or
