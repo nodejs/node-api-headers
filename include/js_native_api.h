@@ -5,19 +5,6 @@
 #include <stdbool.h>  // NOLINT(modernize-deprecated-headers)
 #include <stddef.h>   // NOLINT(modernize-deprecated-headers)
 
-// Use INT_MAX, this should only be consumed by the pre-processor anyway.
-#define NAPI_VERSION_EXPERIMENTAL 2147483647
-#ifndef NAPI_VERSION
-// The baseline version for N-API.
-// The NAPI_VERSION controls which version will be used by default when
-// compilling a native addon. If the addon developer specifically wants to use
-// functions available in a new version of N-API that is not yet ported in all
-// LTS versions, they can set NAPI_VERSION knowing that they have specifically
-// depended on that version.
-#define NAPI_VERSION 8
-#endif
-
-
 #include "js_native_api_types.h"
 
 // If you need __declspec(dllimport), either include <node_api.h> instead, or
@@ -63,6 +50,7 @@ NAPI_EXTERN napi_status NAPI_CDECL napi_get_boolean(napi_env env,
 // Methods to create Primitive types/Objects
 NAPI_EXTERN napi_status NAPI_CDECL napi_create_object(napi_env env,
                                                       napi_value* result);
+
 NAPI_EXTERN napi_status NAPI_CDECL napi_create_array(napi_env env,
                                                      napi_value* result);
 NAPI_EXTERN napi_status NAPI_CDECL
