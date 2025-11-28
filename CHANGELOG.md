@@ -1,5 +1,13 @@
 # node-api-headers Changelog
 
+## [1.7.0](https://github.com/nodejs/node-api-headers/compare/v1.6.0...v1.7.0) (2025-11-28)
+
+
+### Features
+
+* update headers from nodejs/node tag v25.1.0 ([#65](https://github.com/nodejs/node-api-headers/issues/65)) ([f90f754](https://github.com/nodejs/node-api-headers/commit/f90f75459375cb4725914895aa418efefdde7af2))
+* update headers from nodejs/node tag v25.2.1 ([#68](https://github.com/nodejs/node-api-headers/issues/68)) ([769031b](https://github.com/nodejs/node-api-headers/commit/769031b208acd820bf3f2c3b2cf9f8b4b2e2bd83))
+
 ## [1.6.0](https://github.com/nodejs/node-api-headers/compare/v1.5.0...v1.6.0) (2025-09-26)
 
 
