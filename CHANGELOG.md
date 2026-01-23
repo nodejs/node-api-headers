@@ -1,5 +1,12 @@
 # node-api-headers Changelog
 
+## [1.8.0](https://github.com/nodejs/node-api-headers/compare/v1.7.0...v1.8.0) (2026-01-23)
+
+
+### Features
+
+* update headers from nodejs/node tag v25.4.0 ([#70](https://github.com/nodejs/node-api-headers/issues/70)) ([ebc02e1](https://github.com/nodejs/node-api-headers/commit/ebc02e18357a4d49f127f094c144371948b60c84))
+
 ## [1.7.0](https://github.com/nodejs/node-api-headers/compare/v1.6.0...v1.7.0) (2025-11-28)
 
 
